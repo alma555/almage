@@ -8,7 +8,6 @@ import mage.constants.Zone;
 import mage.counters.CounterType;
 import mage.filter.FilterPermanent;
 import mage.filter.common.FilterControlledCreaturePermanent;
-import mage.filter.predicate.permanent.TokenPredicate;
 import mage.game.permanent.token.SquirrelToken;
 import mage.abilities.Ability;
 import mage.abilities.common.SacrificePermanentTriggeredAbility;
@@ -30,14 +29,11 @@ import mage.constants.Duration;
  */
 public final class CamelliaTheSeedmiser extends CardImpl {
 
-    private static final FilterPermanent filter = new FilterPermanent(SubType.FOOD, "one or more Foods");
-
-    static {
-        filter.add(TokenPredicate.TRUE);
-    }
+    private static final FilterPermanent filterFood =
+            new FilterPermanent(SubType.FOOD, "one or more Foods");
 
     private static final FilterControlledCreaturePermanent filterSquirrels =
-            new FilterControlledCreaturePermanent("Squirrels");
+            new FilterControlledCreaturePermanent(SubType.SQUIRREL,"Squirrels");
 
     public CamelliaTheSeedmiser(UUID ownerId, CardSetInfo setInfo) {
         super(ownerId, setInfo, new CardType[]{CardType.CREATURE}, "{1}{B}{G}");
@@ -52,21 +48,23 @@ public final class CamelliaTheSeedmiser extends CardImpl {
         this.addAbility(new MenaceAbility());
 
         // Other Squirrels you control have menace.
-        Ability menaceAbility = new SimpleStaticAbility(Zone.BATTLEFIELD,new GainAbilityControlledEffect(
+        Ability lordAbility = new SimpleStaticAbility(Zone.BATTLEFIELD,new GainAbilityControlledEffect(
                 new MenaceAbility(false),
                 Duration.WhileOnBattlefield,
                 filterSquirrels,
                 true
         ));
+        this.addAbility(lordAbility);
+
         // Whenever you sacrifice one or more Foods, create a 1/1 green Squirrel creature token.
         Ability tokenAbility = new SacrificePermanentTriggeredAbility(
-                new CreateTokenEffect(new SquirrelToken()), filter);
+                new CreateTokenEffect(new SquirrelToken()), filterFood);
         this.addAbility(tokenAbility);
 
         // {2}, Forage: Put a +1/+1 counter on each other Squirrel you control.
         Ability forageAbility = new SimpleActivatedAbility(
                 new AddCountersAllEffect(CounterType.P1P1.createInstance(), filterSquirrels),
-                new ManaCostsImpl<>("{2")
+                new ManaCostsImpl<>("{2}")
         );
         forageAbility.addCost(new ForageCost());
         this.addAbility(forageAbility);
