@@ -72,7 +72,7 @@ public final class CamelliaTheSeedmiser extends CardImpl {
         this.addAbility(tokenAbility);
 
         // {2}, Forage: Put a +1/+1 counter on each other Squirrel you control.
-        Ability forageAbility = newSimpleActivatedAbility(
+        Ability forageAbility = new SimpleActivatedAbility(
                 new AddCountersAllEffect(CounterType.P1P1.createInstance(), filterSquirrels),
                 new ManaCostsImpl<>("{2")
         );
