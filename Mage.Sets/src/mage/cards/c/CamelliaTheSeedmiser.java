@@ -67,12 +67,18 @@ public final class CamelliaTheSeedmiser extends CardImpl {
                 true
         ));
         // Whenever you sacrifice one or more Foods, create a 1/1 green Squirrel creature token.
-        Ability ability = new SacrificePermanentTriggeredAbility(
+        Ability tokenAbility = new SacrificePermanentTriggeredAbility(
                 new CreateTokenEffect(new SquirrelToken()), filter);
-        this.addAbility(ability);
-    }
+        this.addAbility(tokenAbility);
 
-    // {2}, Forage: Put a +1/+1 counter on each other Squirrel you control.
+        // {2}, Forage: Put a +1/+1 counter on each other Squirrel you control.
+        Ability forageAbility = newSimpleActivatedAbility(
+                new AddCountersAllEffect(CounterType.P1P1.createInstance(), filterSquirrels),
+                new ManaCostsImpl<>("{2")
+        );
+        forageAbility.addCost(new ForageCost());
+        this.addAbility(forageAbility);
+    }
 
     private CamelliaTheSeedmiser(final CamelliaTheSeedmiser card) {
         super(card);
