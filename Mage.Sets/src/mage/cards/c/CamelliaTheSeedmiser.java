@@ -1,13 +1,21 @@
 package mage.cards.c;
 
+import java.util.Objects;
 import java.util.UUID;
 import mage.MageInt;
+import mage.abilities.TriggeredAbilityImpl;
+import mage.abilities.effects.common.counter.AddCountersSourceEffect;
 import mage.constants.SubType;
 import mage.constants.SuperType;
 import mage.constants.Zone;
 import mage.counters.CounterType;
 import mage.filter.FilterPermanent;
 import mage.filter.common.FilterControlledCreaturePermanent;
+import mage.filter.common.FilterControlledPermanent;
+import mage.game.Game;
+import mage.game.events.GameEvent;
+import mage.game.events.ZoneChangeGroupEvent;
+import mage.game.permanent.PermanentImpl;
 import mage.game.permanent.token.SquirrelToken;
 import mage.abilities.Ability;
 import mage.abilities.common.SacrificePermanentTriggeredAbility;
@@ -32,8 +40,8 @@ public final class CamelliaTheSeedmiser extends CardImpl {
     private static final FilterPermanent filterFood =
             new FilterPermanent(SubType.FOOD, "one or more Foods");
 
-    private static final FilterControlledCreaturePermanent filterSquirrels =
-            new FilterControlledCreaturePermanent(SubType.SQUIRREL,"Squirrels");
+    private static final FilterControlledPermanent filterSquirrels =
+            new FilterControlledPermanent(SubType.SQUIRREL,"Squirrels");
 
     public CamelliaTheSeedmiser(UUID ownerId, CardSetInfo setInfo) {
         super(ownerId, setInfo, new CardType[]{CardType.CREATURE}, "{1}{B}{G}");
@@ -79,3 +87,38 @@ public final class CamelliaTheSeedmiser extends CardImpl {
         return new CamelliaTheSeedmiser(this);
     }
 }
+
+class CamelliaTheSeedmiserTriggeredAbility extends TriggeredAbilityImpl {
+
+    CamelliaTheSeedmiserTriggeredAbility() {
+        super(Zone.BATTLEFIELD, new AddCountersSourceEffect(CounterType.P1P1.createInstance()), false);
+    }
+
+    private CamelliaTheSeedmiserTriggeredAbility(final CamelliaTheSeedmiserTriggeredAbility ability) {
+        super(ability);
+    }
+
+    @Override
+    public boolean checkEventType(GameEvent event, Game game) {
+        return event.getType() == GameEvent.EventType.ZONE_CHANGE_GROUP;
+    }
+
+    @Override
+    public boolean checkTrigger(GameEvent event, Game game) {
+        ZoneChangeGroupEvent zEvent = (ZoneChangeGroupEvent) event;
+        return Zone.BATTLEFIELD == zEvent.getToZone()
+                && zEvent.getTokens() != null
+                && zEvent
+                .getTokens()
+                .stream()
+                .filter(Objects::nonNull)
+                .map(PermanentImpl::getControllerId)
+                .anyMatch(this::isControlledBy);
+    }
+
+    @Override
+    public CamelliaTheSeedmiserTriggeredAbility copy() {
+        return new CamelliaTheSeedmiserTriggeredAbility(this);
+    }
+}
+
